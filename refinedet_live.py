@@ -21,7 +21,6 @@ import torch.utils.data as data
 
 from src.config import config
 from src.data.data_augment import detection_collate, BaseTransform, preproc
-from src.data.coco import COCODet
 from src.symbol.RefineSSD_vgg import build_net
 from src.loss import RefineMultiBoxLoss
 from src.detection import Detect
@@ -59,15 +58,13 @@ class refinedet_wrapper(object):
         self.detector = Detect(num_classes, 0, module_cfg, object_score=0.01)
         self.val_trainsform = BaseTransform(self.net.size, rgb_means, rgb_std, (2, 0, 1))
 
-    def analyse(self, orig_img):
-        x = Variable(val_trainsform(orig_img).unsqueeze(0), volatile=True)
-        if enable_cuda:
-            x = x.cuda()
+    def analyze(self, orig_img):
+        x = Variable(self.val_trainsform(orig_img).unsqueeze(0), volatile=True)
 
         _t = {'im_detect': Timer(), 'misc': Timer()}
         _t['im_detect'].tic()
         arm_loc, arm_conf, odm_loc, odm_conf = self.net(x=x, test=True)
-        boxes, scores = self.detector.forward((odm_loc, odm_conf), priors, (arm_loc, arm_conf))
+        boxes, scores = self.detector.forward((odm_loc, odm_conf), self.priors, (arm_loc, arm_conf))
         detect_time = _t['im_detect'].toc()
         print("forward time: %fs" % (detect_time))
         boxes = boxes[0]
