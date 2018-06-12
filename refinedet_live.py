@@ -72,7 +72,7 @@ class refinedet_wrapper(object):
         boxes = boxes.cpu().numpy()
         scores = scores.cpu().numpy()
         # scale each detection back up to the image
-        scale = torch.Tensor([img.shape[1], img.shape[0], img.shape[1], img.shape[0]]).cpu().numpy()
+        scale = torch.Tensor([orig_img.shape[1], orig_img.shape[0], orig_img.shape[1], orig_img.shape[0]]).cpu().numpy()
         boxes *= scale
 
         all_boxes = [[] for _ in range(num_classes)]
@@ -87,7 +87,7 @@ class refinedet_wrapper(object):
         for class_id in range(1, num_classes):
             for det in all_boxes[class_id]:
                 left, top, right, bottom, score = det
-                orig_img = cv2.rectangle(img, (left, top), (right, bottom), (255, 255, 0), 1)
+                orig_img = cv2.rectangle(orig_img, (left, top), (right, bottom), (255, 255, 0), 1)
                 orig_img = cv2.putText(orig_img, '%d:%.3f'%(class_id, score), (int(left), int(top)+30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
         # cv2.imwrite("./test_3.png", img_det)
 
